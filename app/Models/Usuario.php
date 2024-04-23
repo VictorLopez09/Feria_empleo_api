@@ -9,6 +9,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class Usuario extends Authenticatable
 {
+    protected $password = 'contrasena';
     use HasApiTokens, HasFactory;
 
     /**
@@ -17,6 +18,7 @@ class Usuario extends Authenticatable
      * @var string
      */
     protected $table = 'usuario';
+    
 
     /**
      * The attributes that are mass assignable.
@@ -49,6 +51,11 @@ class Usuario extends Authenticatable
         'remember_token',
     ];
 
+    public function getAuthPassword()
+    {
+        return $this->contrasena;
+    }
+
     /**
      * The attributes that should be cast.
      *
@@ -57,4 +64,6 @@ class Usuario extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    
 }

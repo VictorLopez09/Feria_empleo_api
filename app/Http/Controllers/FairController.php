@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Feria;
-use App\Models\Registraseferia;
 use Illuminate\Http\Request;
+use App\Models\Registraseferia;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-
 
 class FairController extends Controller
 {
@@ -24,14 +24,14 @@ class FairController extends Controller
         }
 
         // Crea un nuevo registro utilizando el modelo Registraseferia
-        $registro = Registraseferia::create([
+        $register = Registraseferia::create([
             'clave_feria' => $request->clave_feria,
             'curp' => $request->curp,
             'medio' => $request->medio,
         ]);
 
         // Verifica si el registro fue creado con éxito
-        if ($registro) {
+        if ($register) {
             return response()->json(['mensaje' => 'Registro exitoso'], 201);
         } else {
             return response()->json(['mensaje' => 'Error al registrar'], 500);
@@ -45,13 +45,15 @@ class FairController extends Controller
     }
 
 
-    public function BadgeShow()
+    public function BadgeShow(Request $request)
     {
-        $resultado = RegistraseFeria::join('feria', 'registraseferia.clave_feria', '=', 'feria.clave_feria')
-            ->select('registraseferia.clave_registro as id_registro', 'feria.clave_feria as id_feria', 'feria.fecha as fecha_feria')
-            ->orderByRaw('ABS(DATEDIFF(feria.fecha, CURDATE()))')
-            ->limit(1)
-            ->get();
+        $resultado = $resultado = DB::table('registraseferia')
+        ->select('registraseferia.clave_registro as id_registro', 'feria.clave_feria as id_feria', 'feria.nombre_evento as nombre_feria', 'feria.fecha as fecha_feria')
+        ->join('feria', 'registraseferia.clave_feria', '=', 'feria.clave_feria')
+        ->where('registraseferia.curp', $request->curp)
+        ->orderBy(DB::raw('ABS(DATEDIFF(feria.fecha, CURDATE()))'))
+        ->limit(1)
+        ->get();
 
         return $resultado;
     }

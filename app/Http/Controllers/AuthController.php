@@ -4,14 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Usuario;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 
 class AuthController extends Controller
 {
-
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -54,7 +52,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Usuario registrado correctamente',
-            'data' => $usuario,
+
             'access_token' => $token,
             'token_type' => 'Bearer',
         ], 201);
@@ -62,23 +60,24 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email|exists:usuario,email',
+
+        $credentials = $request->only('curp', 'contrasena');
+
+        $validator = Validator::make($credentials, [
+            'curp' => 'required|exists:usuario,curp',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
-        $credentials = $request->only('email', 'contrasena');
-        $user = Usuario::where('email', $credentials['email'])->first();
+        $user = Usuario::where('curp', $credentials['curp'])->first();
 
-        if (!Hash::check($credentials['contrasena'], $user->contrasena)) {
-            return response()->json(['message' => 'La contraseña es incorrecta'], 401);
+        if (!$user || !Hash::check($credentials['contrasena'], $user->contrasena)) {
+            return response()->json(['message' => 'Credenciales inválidas'], 401);
         }
 
-        $usuario = Usuario::where('email', $request->email)->firstOrFail();
-        $token = $usuario->createToken('auth_token')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => '¡Hola, ' . $user->nombre . '!',
@@ -86,17 +85,6 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
         ]);
     }
-
-    public function show(Request $request)
-    {
-        $credentials = $request->only('email');
-        $user = Usuario::where('email', $credentials['email'])->first();
-        return response()->json([
-            'message' => '¡Hola, ' . $user->nombre . '!',
-            'user ' => $user,
-        ]);
-    }
-
 
     public function logout(Request $request)
     {

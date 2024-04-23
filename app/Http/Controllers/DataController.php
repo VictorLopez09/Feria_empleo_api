@@ -9,8 +9,6 @@ use Illuminate\Http\Request;
 
 class DataController extends Controller
 {
-
-
     public function StateShow(Request $request)
     {
         $States =  Estado::all();

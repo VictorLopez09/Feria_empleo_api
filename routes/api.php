@@ -38,7 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-// Aquí va
+// Publicos
 Route::get('State', [DataController::class, 'StateShow']);
 
 
